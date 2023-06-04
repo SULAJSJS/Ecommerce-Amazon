@@ -20,7 +20,10 @@ model User {
   name       String @unique
   avatarPath String @default("/uploads/default-avatar.png") @map("avatar_path")
 
-  phone String @default("")
+  phone     String    @default("")
+  orders    Order[]
+  reviews   Review[]
+  favorites Product[]
 }
 
 model Product {
@@ -33,4 +36,67 @@ model Product {
   description String
   price       Int
   images      String[]
+
+  orderItems OrderItem[]
+  reviews    Review[]
+  Category   Category?   @relation(fields: [categoryId], references: [id])
+  categoryId Int?
+  user       User?       @relation(fields: [userId], references: [id])
+  userId     Int?
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  name    String    @unique
+  product Product[]
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  rating Int
+  text   String
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @map("user_id")
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int     @map("product_id")
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  status EnumOrderItemStatus
+  items  OrderItem[]
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @map("user_id")
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  quantity  Int
+  price     Int
+  Order     Order?   @relation(fields: [orderId], references: [id])
+  orderId   Int?
+  Product   Product? @relation(fields: [productId], references: [id])
+  productId Int?
+}
+
+enum EnumOrderItemStatus {
+  PENDING
+  PAYED
+  SHIPPED
+  DELIVERED
 }
